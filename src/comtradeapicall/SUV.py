@@ -4,7 +4,7 @@ import urllib3
 
 
 def getSUV(subscription_key, typeCode='C', freqCode='A', clCode='HS', period=None, cmdCode=None,
-           flowCode=None, qtyUnitCode=None, proxy_url=None):
+           flowCode=None, qtyUnitCode=None, proxy_url=None, proxy_user=None, proxy_pass=None):
     baseURL = 'https://comtradeapi.un.org/data/v1/getSUV/' + \
         typeCode + '/' + freqCode + '/' + clCode
 
@@ -13,7 +13,11 @@ def getSUV(subscription_key, typeCode='C', freqCode='A', clCode='HS', period=Non
     PARAMS["subscription-key"] = subscription_key
     fields = dict(filter(lambda item: item[1] is not None, PARAMS.items()))
     if proxy_url:
-        http = urllib3.ProxyManager(proxy_url=proxy_url)
+        if proxy_user and proxy_pass:
+            headers = urllib3.util.make_headers(proxy_basic_auth=f'{proxy_user}:{proxy_pass}')
+            http = urllib3.ProxyManager(proxy_url=proxy_url, proxy_headers=headers)
+        else:
+            http = urllib3.ProxyManager(proxy_url=proxy_url)
     else:
         http = urllib3.PoolManager()
     try:

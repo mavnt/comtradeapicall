@@ -4,7 +4,7 @@ from pandas import json_normalize
 import urllib3
 
 
-def getMetadata(subscription_key, typeCode, freqCode, clCode, period, reporterCode, showHistory, proxy_url=None):
+def getMetadata(subscription_key, typeCode, freqCode, clCode, period, reporterCode, showHistory, proxy_url=None, proxy_user=None, proxy_pass=None):
     if (subscription_key is None):
         endpoint = "public"
     else:
@@ -16,7 +16,10 @@ def getMetadata(subscription_key, typeCode, freqCode, clCode, period, reporterCo
     PARAMS["subscription-key"] = subscription_key
     fields = dict(filter(lambda item: item[1] is not None, PARAMS.items()))
     if proxy_url:
-        http = urllib3.ProxyManager(proxy_url=proxy_url)
+        headers = {}
+        if proxy_user and proxy_pass:
+            headers['proxy_basic_auth']= f'{proxy_user}:{proxy_pass}'
+        http = urllib3.ProxyManager(proxy_url=proxy_url, proxy_headers=headers)
     else:
         http = urllib3.PoolManager()
     try:
@@ -50,11 +53,14 @@ def _getMetadata(typeCode, freqCode, clCode, period, reporterCode, showHistory):
     return getMetadata(None, typeCode, freqCode, clCode, period, reporterCode, showHistory)
 
 
-def listReference(category=None, proxy_url=None):
+def listReference(category=None, proxy_url=None, proxy_user=None, proxy_pass=None):
     baseURL = 'https://comtradeapi.un.org/files/v1/app/reference/ListofReferences.json'
     try:
         if proxy_url:
-            http = urllib3.ProxyManager(proxy_url=proxy_url)
+            headers = {}
+            if proxy_user and proxy_pass:
+                headers['proxy_basic_auth']= f'{proxy_user}:{proxy_pass}'
+            http = urllib3.ProxyManager(proxy_url=proxy_url, proxy_headers=headers)
         else:
             http = urllib3.PoolManager()
         resp = http.request("GET", baseURL, timeout=120)
@@ -72,7 +78,7 @@ def listReference(category=None, proxy_url=None):
         print(f'Request error: {err}')
 
 
-def getReference(category, proxy_url=None):
+def getReference(category, proxy_url=None, proxy_user=None, proxy_pass=None):
     try:
         baseURL = listReference(category).iloc[0]['fileuri']
     except:  # noqa: E722
@@ -81,7 +87,11 @@ def getReference(category, proxy_url=None):
     if baseURL != '':
         try:
             if proxy_url:
-                http = urllib3.ProxyManager(proxy_url=proxy_url)
+                if proxy_user and proxy_pass:
+                    headers = urllib3.util.make_headers(proxy_basic_auth=f'{proxy_user}:{proxy_pass}')
+                    http = urllib3.ProxyManager(proxy_url=proxy_url, proxy_headers=headers)
+                else:
+                    http = urllib3.ProxyManager(proxy_url=proxy_url)
             else:
                 http = urllib3.PoolManager()
             resp = http.request("GET", baseURL, timeout=120)
@@ -97,10 +107,14 @@ def getReference(category, proxy_url=None):
             print(f'Request error: {err}')
 
 
-def convertCountryIso3ToCode(countryIsoCode, proxy_url=None):
+def convertCountryIso3ToCode(countryIsoCode, proxy_url=None, proxy_user=None, proxy_pass=None):
     baseURL = 'https://comtradeapi.un.org/files/v1/app/reference/country_area_code_iso.json'
     if proxy_url:
-        http = urllib3.ProxyManager(proxy_url=proxy_url)
+        if proxy_user and proxy_pass:
+            headers = urllib3.util.make_headers(proxy_basic_auth=f'{proxy_user}:{proxy_pass}')
+            http = urllib3.ProxyManager(proxy_url=proxy_url, proxy_headers=headers)
+        else:
+            http = urllib3.ProxyManager(proxy_url=proxy_url)
     else:
         http = urllib3.PoolManager()
     resp = http.request("GET", baseURL, timeout=120)

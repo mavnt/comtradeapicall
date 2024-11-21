@@ -7,7 +7,7 @@ import json
 
 
 def bulkDownloadFile(subscription_key, directory, tradeDataType, typeCode, freqCode, clCode, period, reporterCode,
-                     decompress, publishedDateFrom=None, publishedDateTo=None, proxy_url=None):
+                     decompress, publishedDateFrom=None, publishedDateTo=None, proxy_url=None, proxy_user=None, proxy_pass=None):
 
     if tradeDataType == 'TARIFFLINE':
         baseURLDataAvailability = 'https://comtradeapi.un.org/bulk/v1/getTariffline/' + \
@@ -28,7 +28,11 @@ def bulkDownloadFile(subscription_key, directory, tradeDataType, typeCode, freqC
     PARAMS["subscription-key"] = subscription_key
     fields = dict(filter(lambda item: item[1] is not None, PARAMS.items()))
     if proxy_url:
-        http = urllib3.ProxyManager(proxy_url=proxy_url)
+        if proxy_user and proxy_pass:
+            headers = urllib3.util.make_headers(proxy_basic_auth=f'{proxy_user}:{proxy_pass}')
+            http = urllib3.ProxyManager(proxy_url=proxy_url, proxy_headers=headers)
+        else:
+            http = urllib3.ProxyManager(proxy_url=proxy_url)
     else:
         http = urllib3.PoolManager()
     try:
@@ -91,31 +95,31 @@ def bulkDownloadFile(subscription_key, directory, tradeDataType, typeCode, freqC
         print(f'Request error: {err}')
 
 
-def bulkDownloadFinalFile(subscription_key, directory, typeCode, freqCode, clCode, period=None, reporterCode=None, decompress=False, publishedDateFrom=None, publishedDateTo=None):
+def bulkDownloadFinalFile(subscription_key, directory, typeCode, freqCode, clCode, period=None, reporterCode=None, decompress=False, publishedDateFrom=None, publishedDateTo=None, proxy_url=None, proxy_user=None, proxy_pass=None):
     bulkDownloadFile(subscription_key, directory, 'FINAL', typeCode, freqCode, clCode, period,
-                     reporterCode, decompress, publishedDateFrom, publishedDateTo)
+                     reporterCode, decompress, publishedDateFrom, publishedDateTo, proxy_url, proxy_user, proxy_pass)
 
 
-def bulkDownloadFinalClassicFile(subscription_key, directory, typeCode, freqCode, clCode, period=None, reporterCode=None, decompress=False, publishedDateFrom=None, publishedDateTo=None):
+def bulkDownloadFinalClassicFile(subscription_key, directory, typeCode, freqCode, clCode, period=None, reporterCode=None, decompress=False, publishedDateFrom=None, publishedDateTo=None, proxy_url=None, proxy_user=None, proxy_pass=None):
     bulkDownloadFile(subscription_key, directory, 'FINALCLASSIC', typeCode, freqCode, clCode, period,
-                     reporterCode, decompress, publishedDateFrom, publishedDateTo)
+                     reporterCode, decompress, publishedDateFrom, publishedDateTo, proxy_url, proxy_user, proxy_pass)
 
 
-def bulkDownloadTarifflineFile(subscription_key, directory, typeCode, freqCode, clCode, period=None, reporterCode=None, decompress=False, publishedDateFrom=None, publishedDateTo=None):
+def bulkDownloadTarifflineFile(subscription_key, directory, typeCode, freqCode, clCode, period=None, reporterCode=None, decompress=False, publishedDateFrom=None, publishedDateTo=None, proxy_url=None, proxy_user=None, proxy_pass=None):
     bulkDownloadFile(subscription_key, directory, 'TARIFFLINE', typeCode, freqCode, clCode, period,
-                     reporterCode, decompress, publishedDateFrom, publishedDateTo)
+                     reporterCode, decompress, publishedDateFrom, publishedDateTo, proxy_url, proxy_user, proxy_pass)
 
 
-def bulkDownloadFinalFileDateRange(subscription_key, directory, typeCode, freqCode, clCode, period=None, reporterCode=None, decompress=False, publishedDateFrom=None, publishedDateTo=None):
+def bulkDownloadFinalFileDateRange(subscription_key, directory, typeCode, freqCode, clCode, period=None, reporterCode=None, decompress=False, publishedDateFrom=None, publishedDateTo=None, proxy_url=None, proxy_user=None, proxy_pass=None):
     bulkDownloadFile(subscription_key, directory, 'FINAL', typeCode, freqCode, clCode, period,
-                     reporterCode, decompress, publishedDateFrom, publishedDateTo)
+                     reporterCode, decompress, publishedDateFrom, publishedDateTo, proxy_url, proxy_user, proxy_pass)
 
 
-def bulkDownloadFinalClassicFileDateRange(subscription_key, directory, typeCode, freqCode, clCode, period=None, reporterCode=None, decompress=False, publishedDateFrom=None, publishedDateTo=None):
+def bulkDownloadFinalClassicFileDateRange(subscription_key, directory, typeCode, freqCode, clCode, period=None, reporterCode=None, decompress=False, publishedDateFrom=None, publishedDateTo=None, proxy_url=None, proxy_user=None, proxy_pass=None):
     bulkDownloadFile(subscription_key, directory, 'FINALCLASSIC', typeCode, freqCode, clCode, period,
-                     reporterCode, decompress, publishedDateFrom, publishedDateTo)
+                     reporterCode, decompress, publishedDateFrom, publishedDateTo, proxy_url, proxy_user, proxy_pass)
 
 
-def bulkDownloadTarifflineFileDateRange(subscription_key, directory, typeCode, freqCode, clCode, period=None, reporterCode=None, decompress=False, publishedDateFrom=None, publishedDateTo=None):
+def bulkDownloadTarifflineFileDateRange(subscription_key, directory, typeCode, freqCode, clCode, period=None, reporterCode=None, decompress=False, publishedDateFrom=None, publishedDateTo=None, proxy_url=None, proxy_user=None, proxy_pass=None):
     bulkDownloadFile(subscription_key, directory, 'TARIFFLINE', typeCode, freqCode, clCode, period,
-                     reporterCode, decompress, publishedDateFrom, publishedDateTo)
+                     reporterCode, decompress, publishedDateFrom, publishedDateTo, proxy_url, proxy_user, proxy_pass)

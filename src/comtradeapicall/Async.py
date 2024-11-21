@@ -8,7 +8,7 @@ import shutil
 
 
 def submitAsyncDataRequest(subscription_key, endPoint, typeCode, freqCode, clCode, period, reporterCode, cmdCode,
-                           flowCode, partnerCode, partner2Code, customsCode, motCode, aggregateBy, breakdownMode, proxy_url=None):
+                           flowCode, partnerCode, partner2Code, customsCode, motCode, aggregateBy, breakdownMode, proxy_url=None, proxy_user=None, proxy_pass=None):
     if endPoint == 'TARIFFLINE':
         baseURL = 'https://comtradeapi.un.org/async/v1/getTariffline/' + \
             typeCode + '/' + freqCode + '/' + clCode
@@ -22,7 +22,11 @@ def submitAsyncDataRequest(subscription_key, endPoint, typeCode, freqCode, clCod
     PARAMS["subscription-key"] = subscription_key
     fields = dict(filter(lambda item: item[1] is not None, PARAMS.items()))
     if proxy_url:
-        http = urllib3.ProxyManager(proxy_url=proxy_url)
+        if proxy_user and proxy_pass:
+            headers = urllib3.util.make_headers(proxy_basic_auth=f'{proxy_user}:{proxy_pass}')
+            http = urllib3.ProxyManager(proxy_url=proxy_url, proxy_headers=headers)
+        else:
+            http = urllib3.ProxyManager(proxy_url=proxy_url)
     else:
         http = urllib3.PoolManager()
     try:
@@ -40,7 +44,7 @@ def submitAsyncDataRequest(subscription_key, endPoint, typeCode, freqCode, clCod
 def submitAsyncFinalDataRequest(subscription_key, typeCode, freqCode, clCode, period, reporterCode, cmdCode, flowCode,
                                 partnerCode,
                                 partner2Code, customsCode, motCode,  aggregateBy=None,
-                                breakdownMode=None, proxy_url=None):
+                                breakdownMode=None, proxy_url=None, proxy_user=None, proxy_pass=None):
     return submitAsyncDataRequest(subscription_key, 'FINAL', typeCode, freqCode, clCode, period, reporterCode,
                                   cmdCode, flowCode,
                                   partnerCode,
@@ -48,20 +52,24 @@ def submitAsyncFinalDataRequest(subscription_key, typeCode, freqCode, clCode, pe
 
 
 def submitAsyncTarifflineDataRequest(subscription_key, typeCode, freqCode, clCode, period, reporterCode, cmdCode,
-                                     flowCode, partnerCode, partner2Code, customsCode, motCode, proxy_url=None):
+                                     flowCode, partnerCode, partner2Code, customsCode, motCode, proxy_url=None, proxy_user=None, proxy_pass=None):
     return submitAsyncDataRequest(subscription_key, 'TARIFFLINE', typeCode, freqCode, clCode, period, reporterCode,
                                   cmdCode, flowCode,
                                   partnerCode,
                                   partner2Code, customsCode, motCode, aggregateBy=None, breakdownMode=None, proxy_url=proxy_url)
 
 
-def checkAsyncDataRequest(subscription_key, batchId=None, proxy_url=None):
+def checkAsyncDataRequest(subscription_key, batchId=None, proxy_url=None, proxy_user=None, proxy_pass=None):
     baseURL = 'https://comtradeapi.un.org/async/v1/getDA/'
     PARAMS = dict(batchId=batchId)
     PARAMS["subscription-key"] = subscription_key
     fields = dict(filter(lambda item: item[1] is not None, PARAMS.items()))
     if proxy_url:
-        http = urllib3.ProxyManager(proxy_url=proxy_url)
+        if proxy_user and proxy_pass:
+            headers = urllib3.util.make_headers(proxy_basic_auth=f'{proxy_user}:{proxy_pass}')
+            http = urllib3.ProxyManager(proxy_url=proxy_url, proxy_headers=headers)
+        else:
+            http = urllib3.ProxyManager(proxy_url=proxy_url)
     else:
         http = urllib3.PoolManager()
     try:
@@ -78,7 +86,7 @@ def checkAsyncDataRequest(subscription_key, batchId=None, proxy_url=None):
 
 def downloadAsyncFinalDataRequest(subscription_key, directory, typeCode, freqCode, clCode, period,
                                   reporterCode, cmdCode, flowCode, partnerCode, partner2Code, customsCode, motCode,
-                                  aggregateBy=None, breakdownMode=None, proxy_url=None):
+                                  aggregateBy=None, breakdownMode=None, proxy_url=None, proxy_user=None, proxy_pass=None):
     myJson = submitAsyncFinalDataRequest(subscription_key, typeCode, freqCode, clCode, period, reporterCode,
                                          cmdCode, flowCode, partnerCode, partner2Code, customsCode, motCode, aggregateBy, breakdownMode, proxy_url=proxy_url)
     batchId = myJson['requestId']
@@ -98,7 +106,11 @@ def downloadAsyncFinalDataRequest(subscription_key, directory, typeCode, freqCod
         download_path = os.path.join(directory, fileName)
         # download file
         if proxy_url:
-            httpFILE = urllib3.ProxyManager(proxy_url=proxy_url)
+            if proxy_user and proxy_pass:
+                headers = urllib3.util.make_headers(proxy_basic_auth=f'{proxy_user}:{proxy_pass}')
+                http = urllib3.ProxyManager(proxy_url=proxy_url, proxy_headers=headers)
+            else:
+                http = urllib3.ProxyManager(proxy_url=proxy_url)
         else:
             httpFILE = urllib3.PoolManager()
         with open(download_path, 'wb') as out:
@@ -111,7 +123,7 @@ def downloadAsyncFinalDataRequest(subscription_key, directory, typeCode, freqCod
 
 
 def downloadAsyncTarifflineDataRequest(subscription_key, directory, typeCode, freqCode, clCode, period,
-                                       reporterCode, cmdCode, flowCode, partnerCode, partner2Code, customsCode, motCode, proxy_url=None):
+                                       reporterCode, cmdCode, flowCode, partnerCode, partner2Code, customsCode, motCode, proxy_url=None, proxy_user=None, proxy_pass=None):
     myJson = submitAsyncTarifflineDataRequest(subscription_key, typeCode, freqCode, clCode, period, reporterCode,
                                               cmdCode, flowCode, partnerCode, partner2Code, customsCode, motCode, proxy_url=proxy_url)
     batchId = myJson['requestId']
@@ -132,7 +144,11 @@ def downloadAsyncTarifflineDataRequest(subscription_key, directory, typeCode, fr
         download_path = os.path.join(directory, fileName)
         # download file
         if proxy_url:
-            httpFILE = urllib3.ProxyManager(proxy_url=proxy_url)
+            if proxy_user and proxy_pass:
+                headers = urllib3.util.make_headers(proxy_basic_auth=f'{proxy_user}:{proxy_pass}')
+                http = urllib3.ProxyManager(proxy_url=proxy_url, proxy_headers=headers)
+            else:
+                http = urllib3.ProxyManager(proxy_url=proxy_url)
         else:
             httpFILE = urllib3.PoolManager()
         with open(download_path, 'wb') as out:

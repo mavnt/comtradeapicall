@@ -3,7 +3,7 @@ from pandas import json_normalize
 import urllib3
 
 
-def getAIS(subscription_key, typeCode='C', freqCode='D', clCode='XX', countryareaCode='', vesselTypeCode='', flowCode='', dateFrom='', dateTo='', maxRecords=250000, proxy_url=None):
+def getAIS(subscription_key, typeCode='C', freqCode='D', clCode='XX', countryareaCode='', vesselTypeCode='', flowCode='', dateFrom='', dateTo='', maxRecords=250000, proxy_url=None, proxy_user=None, proxy_pass=None):
     baseURL = 'https://comtradeapi.un.org/experimental/v1/getAIS/' + \
         typeCode + '/' + freqCode + '/' + clCode
     PARAMS = dict(countryareaCode=countryareaCode, vesselTypeCode=vesselTypeCode,
@@ -12,7 +12,11 @@ def getAIS(subscription_key, typeCode='C', freqCode='D', clCode='XX', countryare
     PARAMS["subscription-key"] = subscription_key
     fields = dict(filter(lambda item: item[1] is not None, PARAMS.items()))
     if proxy_url:
-        http = urllib3.ProxyManager(proxy_url=proxy_url)
+        if proxy_user and proxy_pass:
+            headers = urllib3.util.make_headers(proxy_basic_auth=f'{proxy_user}:{proxy_pass}')
+            http = urllib3.ProxyManager(proxy_url=proxy_url, proxy_headers=headers)
+        else:
+            http = urllib3.ProxyManager(proxy_url=proxy_url)
     else:
         http = urllib3.PoolManager()
     try:

@@ -3,13 +3,17 @@ from pandas import json_normalize
 import urllib3
 
 
-def getLiveUpdate(subscription_key, proxy_url=None):
+def getLiveUpdate(subscription_key, proxy_url=None, proxy_user=None, proxy_pass=None):
     baseURL = 'https://comtradeapi.un.org/data/v1/getLiveUpdate'
     PARAMS = dict()
     PARAMS["subscription-key"] = subscription_key
     fields = dict(filter(lambda item: item[1] is not None, PARAMS.items()))
     if proxy_url:
-        http = urllib3.ProxyManager(proxy_url=proxy_url)
+        if proxy_user and proxy_pass:
+            headers = urllib3.util.make_headers(proxy_basic_auth=f'{proxy_user}:{proxy_pass}')
+            http = urllib3.ProxyManager(proxy_url=proxy_url, proxy_headers=headers)
+        else:
+            http = urllib3.ProxyManager(proxy_url=proxy_url)
     else:
         http = urllib3.PoolManager()
     try:
@@ -24,7 +28,7 @@ def getLiveUpdate(subscription_key, proxy_url=None):
         print(f'Request error: {err}')
 
 
-def getDataAvailability(subscription_key, tradeDataType, dataAvailabilityType, typeCode, freqCode, clCode, period, reporterCode, publishedDateFrom, publishedDateTo, proxy_url=None):
+def getDataAvailability(subscription_key, tradeDataType, dataAvailabilityType, typeCode, freqCode, clCode, period, reporterCode, publishedDateFrom, publishedDateTo, proxy_url=None, proxy_user=None, proxy_pass=None):
 
     if (subscription_key is None):
         endpoint = "public"
@@ -54,7 +58,11 @@ def getDataAvailability(subscription_key, tradeDataType, dataAvailabilityType, t
     PARAMS["subscription-key"] = subscription_key
     fields = dict(filter(lambda item: item[1] is not None, PARAMS.items()))
     if proxy_url:
-        http = urllib3.ProxyManager(proxy_url=proxy_url)
+        if proxy_user and proxy_pass:
+            headers = urllib3.util.make_headers(proxy_basic_auth=f'{proxy_user}:{proxy_pass}')
+            http = urllib3.ProxyManager(proxy_url=proxy_url, proxy_headers=headers)
+        else:
+            http = urllib3.ProxyManager(proxy_url=proxy_url)
     else:
         http = urllib3.PoolManager()
     try:
